@@ -2,37 +2,37 @@ package DataStructure;
 
 public class Queue<T> {
 
-    ListNode<T> front;
-    ListNode<T> rear;
+    private ListNode<T> front;
+    private ListNode<T> rear;
+    private int size;
 
     public Queue() {
         this.front = null;
         this.rear = null;
+        this.size = 0;
     }
 
     public void enqueue(T data) {
     	ListNode<T> node = new ListNode<T>(data);
-        ListNode<T> temp;
+        
     	if (empty()) {
         	front = node;
-        	return;
-        }
-        else if (rear == null) {
-        	temp = front;
         }
         else {
-        	temp = rear;
+        	rear.link(node);
         }
-        temp.link(node);
-        rear = node;
+    	
+    	rear = node;
+    	++size;
     }
 
     public T dequeue() {
     	if (empty())
-    		throw new ArrayIndexOutOfBoundsException();
+    		return null;
     	else {
     		T temp = front.get();
     		front = front.next();
+    		--size;
     		return temp;
     	}
     }
@@ -58,7 +58,7 @@ public class Queue<T> {
 //    }
 
     private boolean empty() {
-        return front == rear;
+        return size == 0;
     }
     
 }
