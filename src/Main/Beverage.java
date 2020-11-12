@@ -1,8 +1,5 @@
 package Main;
 
-import java.awt.Image;
-import java.net.URL;
-
 import javax.swing.ImageIcon;
 
 public class Beverage {
@@ -14,12 +11,12 @@ public class Beverage {
 	
 	private static final int BEVERAGE_AMOUNT = 5;
 	
-	public Beverage(String path, String type, int price) {
-		this(path, type, price, BEVERAGE_AMOUNT);
+	public Beverage(ImageIcon icon, String type, int price) {
+		this(icon, type, price, BEVERAGE_AMOUNT);
 	}
 	
-	private Beverage(String path, String type, int price, int amount) {
-		this.icon = getImageIcon(path);
+	private Beverage(ImageIcon icon, String type, int price, int amount) {
+		this.icon = icon;
 		this.type = type;
 		this.price= price;
 		this.amount = amount;
@@ -54,18 +51,6 @@ public class Beverage {
 	}
 	
 	public ImageIcon getIcon() {
-		return icon;
-	}
-	
-	private ImageIcon getImageIcon(String path) {
-		path = String.format("../images/%s", path);
-		URL url = Main.class.getResource(path);
-		
-		ImageIcon icon = new ImageIcon(url);
-		Image img = icon.getImage();
-		img = img.getScaledInstance(Main.PRODUCT_IMAGE_WIDTH, Main.PRODUCT_IMAGE_HEIGHT, Image.SCALE_SMOOTH);
-		icon = new ImageIcon(img);
-		
 		return icon;
 	}
 }
