@@ -10,15 +10,25 @@ public class ListNode<T> {
         this.link = null;
     }
 
-    protected void link(ListNode<T> node) {
+    public void link(ListNode<T> node) {
         this.link = node;
     }
 
-    protected T get() {
+    public T get() {
         return data;
     }
+    
+    public T get(int search) {
+    	int i = 0;
+    	for (ListNode<T> node = this; node != null; node = node.next()) {
+    		if (i == search)
+    			return node.get();
+    		++i;
+    	}
+    	throw new ArrayIndexOutOfBoundsException();
+    }
 
-    protected ListNode<T> next() {
+    public ListNode<T> next() {
         return link;
     }
 }
