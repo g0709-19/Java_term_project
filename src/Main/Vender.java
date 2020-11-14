@@ -1,6 +1,7 @@
 package Main;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
@@ -8,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,14 +20,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import DataStructure.LinkedList;
+import Money.Bill;
+import Money.Coin;
+import Money.Money;
 
 public class Vender extends JFrame {
 	
+	/* 상수 */
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
 	
-	// 음료 목록 리스트 나중에 큐로 구현해야됨
-	private LinkedList<Beverage> beverages;
+	public static final int DEFAULT_CHANGE_AMOUNT = 5;
 	
 	public static final int PRODUCT_IMAGE_WIDTH = 64;
 	public static final int PRODUCT_IMAGE_HEIGHT = 64;
@@ -35,7 +39,22 @@ public class Vender extends JFrame {
 	private static final int PRODUCT_START_Y = 60;
 	public static final int PRODUCT_GAP = 10;
 	
+	private static final int INPUT_BILL_LIMIT = 3000;
+	private static final int INPUT_FULL_LIMIT = 5000;
+	
 	public static final Font DEFAUlT_FONT = new Font("맑은 고딕", Font.PLAIN, 12);
+	
+	// 음료 목록 리스트 나중에 큐로 구현해야됨
+	private LinkedList<Beverage> beverages;
+	private LinkedList<Money> money;
+	private LinkedList<Money> inputed;
+	
+	/* GUI 컴포넌트 */
+	private JPanel contentPane;
+	private JLabel inputed_money_label;
+	private LinkedList<JButton> input_money_buttons;
+	private JPanel input_money_pannel;
+	
 	
 	public Vender() {
 		setResizable(false);
@@ -55,8 +74,46 @@ public class Vender extends JFrame {
 		lblNewLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		
+		input_money_pannel = new JPanel();
+		input_money_pannel.setBounds(12, 385, 374, 66);
+		contentPane.add(input_money_pannel);
+		
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBounds(291, 226, 93, 66);
+		contentPane.add(panel_2);
+		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
+		
+		JLabel lblNewLabel_1 = new JLabel("\uC785\uB825\uB41C \uAE08\uC561");
+		lblNewLabel_1.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel_2.add(lblNewLabel_1);
+		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		inputed_money_label = new JLabel("0\uC6D0");
+		inputed_money_label.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel_2.add(inputed_money_label);
+		inputed_money_label.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		JButton btnNewButton = new JButton("\uBC18\uD658");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				displayInputedMoney();
+			}
+		});
+		btnNewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel_2.add(btnNewButton);
+		
 		// 음료 목록 초기화
 		initBeverages();
+		
+		// 거스름돈 초기화
+		initMoney();
+		
+		// 금액 입력 버튼 생성
+		createInputMoneyButtons();
+		
+		// 돈 입력 버튼 이벤트 추가
+		initInputMoneyButtons();
 		
 		for (int i=0; i<beverages.size(); ++i) {
 			Beverage b = beverages.get(i);
@@ -65,7 +122,6 @@ public class Vender extends JFrame {
 		
 		setVisible(true);
 	}
-	
 	
 	/* 자판기 창 라벨 설정 */
 	private void display(JPanel contentPane, Beverage b, int i) {
@@ -171,6 +227,41 @@ public class Vender extends JFrame {
 		return icon;
 	}
 	
+	/* 입력 금액 출력 */
+	public void displayInputedMoney() {
+		int has = Money.getFullPrice(inputed);
+		String result = String.format("%,3d원", has);
+		
+		inputed_money_label.setText(result);
+		System.out.printf("display: %s\n", result);
+	}
+	
+	private boolean addInputMoney(int value) {
+		int bill = Money.getBillPrice(inputed);
+		int full = Money.getFullPrice(inputed);
+		
+		if (full + value > INPUT_FULL_LIMIT
+				|| (bill >= INPUT_BILL_LIMIT
+					&& value >= 1000))
+			return false;
+		
+		Money.addMoney(inputed, value);
+		return true;
+	}
+	
+	/* 금액 입력 버튼 클릭 시 이벤트 */
+	private void handleInputMoney(int value) {
+		if (addInputMoney(value))
+			displayInputedMoney();
+		else
+			System.out.println("추가할 수 없어요");
+	}
+	
+	private void returnMoney() {
+		inputed = new LinkedList<>();
+		
+	}
+	
 	////////////////////////////////////////////////////
 	
 	/* 음료 재고 초기화(default) */
@@ -194,11 +285,88 @@ public class Vender extends JFrame {
 		}
 	}
 	
+	/* 거스름돈 초기화(default) */
+	
+	private void initMoney() {
+		
+		money = new LinkedList<>();
+		inputed = new LinkedList<>();
+		
+		int[] money_unit = new int[] {
+				10, 50, 100, 500, 1000
+		};
+		
+		for (int i=0; i<money_unit.length; ++i) {
+			Money m = createMoneyWithType(money_unit[i], DEFAULT_CHANGE_AMOUNT);
+			Money m2 = createMoneyWithType(money_unit[i], 0);
+			money.add(m);
+			inputed.add(m2);
+		}
+		
+		System.out.printf("자판기는 총 %,3d원b 을 가지고 있습니다\n", Money.getFullPrice(money));
+	}
+	
+	private void initInputedMoney() {
+		
+	}
+	
+	private Money createMoneyWithType(int price, int amount) {
+		Money m;
+		if (price >= 1000)
+			m = new Bill(price, amount);
+		else
+			m = new Coin(price, amount);
+		return m;
+	}
+	
+	/* 금액 입력 버튼 생성 */
+	private void createInputMoneyButtons() {
+		int[] buttons = {
+			10, 50, 100, 500, 1000	
+		};
+		
+		if (input_money_buttons == null)
+			input_money_buttons = new LinkedList<>();
+		
+		for (int b : buttons) {
+			JButton btn = new JButton(String.valueOf(b));
+			input_money_buttons.add(btn);
+		}
+	}
+	
+	/* 금액 입력 버튼 이벤트 추가 */
+	private void initInputMoneyButtons() {
+		if (input_money_buttons != null) {
+			for (int i=0; i<input_money_buttons.size(); ++i) {
+				JButton btn = input_money_buttons.get(i);
+				
+				btn.addActionListener(new ActionListener() {
+					final int money = Integer.parseInt(btn.getText());
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println(money);
+						handleInputMoney(money);
+					}
+				});
+				
+				input_money_pannel.add(btn);
+			}
+		}
+	}
+	
 	/* 자판기에 입력된 돈으로 음료를 살 수 있는지 여부 반환 */
 	private boolean canBuy(Beverage b) {
 		int money = 500;
 		int price = b.getPrice();
 		return money >= price;
+	}
+	
+	/////////////////////////////////////////////
+	
+	/* 금액 입력 버튼 */
+	public void handleInputMoney() {
+		
 	}
 	
 	/////////////////////////////////////////////
@@ -214,5 +382,4 @@ public class Vender extends JFrame {
 			}
 		});
 	}
-	
 }
