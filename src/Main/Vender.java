@@ -1,27 +1,20 @@
 package Main;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
 
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 
 import DataStructure.LinkedList;
-import Money.Bill;
-import Money.Coin;
 import Money.Money;
 
 public class Vender extends JFrame {
@@ -35,14 +28,15 @@ public class Vender extends JFrame {
 	public static final int PRODUCT_IMAGE_HEIGHT = 64;
 	public static final int ITEM_LABEL_HEIGHT = 15;
 	
-	private static final int PRODUCT_START_X = 12;
-	private static final int PRODUCT_START_Y = 60;
 	public static final int PRODUCT_GAP = 10;
 	
 	private static final int INPUT_BILL_LIMIT = 3000;
 	private static final int INPUT_FULL_LIMIT = 5000;
 	
 	public static final Font DEFAUlT_FONT = new Font("맑은 고딕", Font.PLAIN, 12);
+	
+	/* 사용자 */
+	private User user;
 	
 	// 음료 목록 리스트 나중에 큐로 구현해야됨
 	private LinkedList<Beverage> beverages;
@@ -53,6 +47,8 @@ public class Vender extends JFrame {
 	private JPanel contentPane;
 	private JLabel inputed_money_label;
 	private LinkedList<JButton> input_money_buttons;
+	private LinkedList<JLabel> input_money_labels;
+	private LinkedList<ItemInfo> item_info_components;
 	private JPanel input_money_pannel;
 	
 	
@@ -78,9 +74,8 @@ public class Vender extends JFrame {
 		input_money_pannel.setBounds(12, 385, 374, 66);
 		contentPane.add(input_money_pannel);
 		
-		
 		JPanel panel_2 = new JPanel();
-		panel_2.setBounds(291, 226, 93, 66);
+		panel_2.setBounds(291, 238, 93, 66);
 		contentPane.add(panel_2);
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
 		
@@ -97,134 +92,64 @@ public class Vender extends JFrame {
 		JButton btnNewButton = new JButton("\uBC18\uD658");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				returnMoney();
 				displayInputedMoney();
 			}
 		});
 		btnNewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		panel_2.add(btnNewButton);
 		
+		JPanel item_display_panel = new JPanel();
+		item_display_panel.setBounds(12, 85, 372, 133);
+		contentPane.add(item_display_panel);
+		
+		// 유저 초기화
+		initUser();
+		
 		// 음료 목록 초기화
 		initBeverages();
+		
+		// 아이템 정보 담을 리스트 초기화
+		initItemInfoComponent(item_display_panel);
 		
 		// 거스름돈 초기화
 		initMoney();
 		
+		// 입력 금액 초기화
+		initInputedMoney();
+		
 		// 금액 입력 버튼 생성
 		createInputMoneyButtons();
+		
+		createInputMoneyLabels();
 		
 		// 돈 입력 버튼 이벤트 추가
 		initInputMoneyButtons();
 		
-		for (int i=0; i<beverages.size(); ++i) {
-			Beverage b = beverages.get(i);
-			display(contentPane, b, i);
-		}
-		
+		// 자판기 GUI 표시
 		setVisible(true);
 	}
 	
-	/* 자판기 창 라벨 설정 */
-	private void display(JPanel contentPane, Beverage b, int i) {
-		JLabel before;
-		
-		int item_x = (i+1) * 12 + (i * PRODUCT_IMAGE_WIDTH);
-		int item_y = PRODUCT_START_Y;
-		
-		// 음료 이름
-		JLabel item_name = getNameLabel(b, item_x, item_y);
-		contentPane.add(item_name);
-		
-		// 라벨 간의 간격 설정
-		before = item_name;
-		item_y += getGap(before);
-		
-		// 음료 이미지 (입력 금액 충족 시 이미지 border 생성)
-		JLabel item_image = getImageLabel(b, item_x, item_y);
-		contentPane.add(item_image);
-		
-		// 라벨 간의 간격 설정
-		before = item_image;
-		item_y += getGap(before);
-		
-		// 음료 가격
-		JLabel item_price = getPriceLabel(b, item_x, item_y);
-		contentPane.add(item_price);
-		
-		// 라벨 간의 간격 설정
-		before = item_price;
-		item_y += getGap(before);
-		
-		// 구매 버튼 (품절 표시 기능 포함)
-		JButton item_buy_btn = getBuyButton(b, item_x, item_y);
-		contentPane.add(item_buy_btn);
+	private void initUser() {
+		user = new User();
 	}
 	
-	/* 라벨 간의 간격 반환 */
-	private int getGap(JLabel before) {
-		return PRODUCT_GAP + before.getHeight();
-	}
-	
-	/* 음료 정보 받아 종류 라벨 생성 */
-	private JLabel getNameLabel(Beverage b, int x, int y) {
-		JLabel item_name = new JLabel();
-		item_name.setText(b.getType());
-		item_name.setHorizontalAlignment(SwingConstants.CENTER);
-		item_name.setFont(DEFAUlT_FONT);
-		item_name.setBounds(x, y, PRODUCT_IMAGE_WIDTH, ITEM_LABEL_HEIGHT);
-		return item_name;
-	}
-	
-	/* 음료 정보 받아 이미지 생성 */
-	private JLabel getImageLabel(Beverage b, int x, int y) {
-		JLabel item_image = new JLabel();
-		
-		if (canBuy(b)) {
-			LineBorder border = new LineBorder(Color.red, 1, true);
-			item_image.setBorder(border);			
+	/* 아이템 정보에 추가될 라벨, 버튼의 컴포넌트를 담을 리스트 초기화 */
+	private void initItemInfoComponent(JPanel item_display_panel) {
+		item_info_components = new LinkedList<>();
+		for (int i=0; i<beverages.size(); ++i) {
+			Beverage b = beverages.get(i);
+			ItemInfo info = new ItemInfo(this, item_display_panel, b);
+			item_info_components.add(info);
 		}
-		
-		item_image.setIcon(b.getIcon());
-		item_image.setBounds(x, y, PRODUCT_IMAGE_WIDTH, PRODUCT_IMAGE_HEIGHT);
-		return item_image;
 	}
 	
-	/* 음료 정보 받아 가격 라벨 생성 */
-	private JLabel getPriceLabel(Beverage b, int x, int y) {
-		JLabel item_price = new JLabel();
-		String price_text = String.valueOf(b.getPrice()) + "원";
-		item_price.setText(price_text);
-		item_price.setHorizontalAlignment(SwingConstants.CENTER);
-		item_price.setFont(DEFAUlT_FONT);
-		item_price.setBounds(x, y, PRODUCT_IMAGE_WIDTH, ITEM_LABEL_HEIGHT);
-		return item_price;
+	public LinkedList<Money> getInputedMoney() {
+		return inputed;
 	}
 	
-	/* 음료 정보 받아 구매 버튼 생성 */
-	private JButton getBuyButton(Beverage b, int x, int y) {
-		JButton item_buy_btn = new JButton("구매");
-		item_buy_btn.setHorizontalAlignment(SwingConstants.CENTER);
-		item_buy_btn.setFont(DEFAUlT_FONT);
-		item_buy_btn.setBounds(x, y, PRODUCT_IMAGE_WIDTH, ITEM_LABEL_HEIGHT);
-		item_buy_btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.printf("%s: %d원\n", b.getType(), b.getPrice());
-			}
-		});
-		return item_buy_btn;
-	}
-	
-	/* 경로로부터 ImageIcon 을 가져옴. */
-	private ImageIcon getImageIcon(String path) {
-		path = String.format("../images/%s", path);
-		URL url = this.getClass().getResource(path);
-		
-		ImageIcon icon = new ImageIcon(url);
-		Image img = icon.getImage();
-		
-		img = img.getScaledInstance(PRODUCT_IMAGE_WIDTH, PRODUCT_IMAGE_HEIGHT, Image.SCALE_SMOOTH);	// 칸에 맞춰 이미지 사이즈 조절
-		icon = new ImageIcon(img);
-		
-		return icon;
+	private void updateItemInfoComponent() {
+		ItemInfo.updateAll(item_info_components);
 	}
 	
 	/* 입력 금액 출력 */
@@ -240,6 +165,7 @@ public class Vender extends JFrame {
 		int bill = Money.getBillPrice(inputed);
 		int full = Money.getFullPrice(inputed);
 		
+		System.out.printf("%d %d %d\n", full+value, bill, value);
 		if (full + value > INPUT_FULL_LIMIT
 				|| (bill >= INPUT_BILL_LIMIT
 					&& value >= 1000))
@@ -249,17 +175,41 @@ public class Vender extends JFrame {
 		return true;
 	}
 	
+	private void displayUserMoney() {
+		int size = input_money_labels.size();
+		LinkedList<Money> money = user.getMoney();
+		for (int i=0; i<size; ++i) {
+			JLabel label = input_money_labels.get(i);
+			int amount = Money.getMoneyAmount(money, Money.money_unit[i]);
+			label.setText(String.valueOf(amount));
+		}
+	}
+	
 	/* 금액 입력 버튼 클릭 시 이벤트 */
 	private void handleInputMoney(int value) {
-		if (addInputMoney(value))
+		if (user.hasMoney(value) && addInputMoney(value)) {
+			user.takeMoney(value);
 			displayInputedMoney();
+			displayUserMoney();
+			updateItemInfoComponent();
+		}
 		else
 			System.out.println("추가할 수 없어요");
 	}
 	
 	private void returnMoney() {
-		inputed = new LinkedList<>();
-		
+		for (;inputed.size() > 0;) {
+			Money m = inputed.remove(0);
+			if (m.getAmount() <= 0) continue;
+			System.out.printf("인출 %d %d\n", m.getPrice(), m.getAmount());
+			
+			LinkedList<Money> user_money = user.getMoney();
+			Money.addMoney(user_money, m);
+			
+			displayUserMoney();
+		}
+		updateItemInfoComponent();
+		initInputedMoney();
 	}
 	
 	////////////////////////////////////////////////////
@@ -279,64 +229,72 @@ public class Vender extends JFrame {
 				450, 500, 550, 700, 750
 		};
 		for (int i=0; i<types.length; ++i) {
-			ImageIcon icon = getImageIcon(paths[i]);
-			b = new Beverage(icon, types[i], prices[i]);
+			b = new Beverage(paths[i], types[i], prices[i]);
 			beverages.add(b);
 		}
 	}
 	
 	/* 거스름돈 초기화(default) */
-	
 	private void initMoney() {
-		
 		money = new LinkedList<>();
-		inputed = new LinkedList<>();
-		
-		int[] money_unit = new int[] {
-				10, 50, 100, 500, 1000
-		};
-		
-		for (int i=0; i<money_unit.length; ++i) {
-			Money m = createMoneyWithType(money_unit[i], DEFAULT_CHANGE_AMOUNT);
-			Money m2 = createMoneyWithType(money_unit[i], 0);
-			money.add(m);
-			inputed.add(m2);
-		}
+		Money.initMoneyList(money, 5);
 		
 		System.out.printf("자판기는 총 %,3d원b 을 가지고 있습니다\n", Money.getFullPrice(money));
 	}
 	
+	/* 입력 금액 초기화 */
 	private void initInputedMoney() {
+		inputed = new LinkedList<>();
+		Money.initMoneyList(inputed, 0);
 		
-	}
-	
-	private Money createMoneyWithType(int price, int amount) {
-		Money m;
-		if (price >= 1000)
-			m = new Bill(price, amount);
-		else
-			m = new Coin(price, amount);
-		return m;
+		System.out.printf("입력금액 총 %,3d원b 을 가지고 있습니다\n", Money.getFullPrice(inputed));
 	}
 	
 	/* 금액 입력 버튼 생성 */
 	private void createInputMoneyButtons() {
-		int[] buttons = {
-			10, 50, 100, 500, 1000	
-		};
 		
 		if (input_money_buttons == null)
 			input_money_buttons = new LinkedList<>();
 		
-		for (int b : buttons) {
+		for (int b : Money.money_unit) {
 			JButton btn = new JButton(String.valueOf(b));
 			input_money_buttons.add(btn);
 		}
 	}
 	
+	/* 금액 입력 버튼 밑 사용자 보유 개수 라벨 생성 */
+	private void createInputMoneyLabels() {
+		
+		if (input_money_labels == null)
+			input_money_labels = new LinkedList<>();
+		
+		LinkedList<Money> money = user.getMoney();
+		
+		for (int unit : Money.money_unit) {
+			int amount = Money.getMoneyAmount(money, unit);
+			JLabel label = new JLabel(String.valueOf(amount));
+			input_money_labels.add(label);
+		}
+	}
+	
+	public LinkedList<ItemInfo> getItemInfoes() {
+		return item_info_components;
+	}
+	
+	public void buy() {
+		
+	}
+	
+	public boolean canBuy(Beverage b) {
+		if (inputed == null) return false;
+		int full = Money.getFullPrice(inputed);
+		return full >= b.getPrice();
+	}
+	
 	/* 금액 입력 버튼 이벤트 추가 */
 	private void initInputMoneyButtons() {
 		if (input_money_buttons != null) {
+			
 			for (int i=0; i<input_money_buttons.size(); ++i) {
 				JButton btn = input_money_buttons.get(i);
 				
@@ -350,16 +308,18 @@ public class Vender extends JFrame {
 					}
 				});
 				
-				input_money_pannel.add(btn);
+				btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+				JLabel label = input_money_labels.get(i);
+				label.setAlignmentX(Component.CENTER_ALIGNMENT);
+				
+				JPanel panel = new JPanel();
+				panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+				panel.add(btn);
+				panel.add(input_money_labels.get(i));
+				input_money_pannel.add(panel);
 			}
+			
 		}
-	}
-	
-	/* 자판기에 입력된 돈으로 음료를 살 수 있는지 여부 반환 */
-	private boolean canBuy(Beverage b) {
-		int money = 500;
-		int price = b.getPrice();
-		return money >= price;
 	}
 	
 	/////////////////////////////////////////////
