@@ -14,6 +14,10 @@ public class ListNode<T> {
         this.link = node;
     }
 
+    public void set(T data) {
+    	this.data = data;
+    }
+    
     public T get() {
         return data;
     }

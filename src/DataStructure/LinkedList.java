@@ -29,6 +29,16 @@ public class LinkedList<T> {
 		++size;
 	}
 	
+	public void set(int index, T data) {
+		int i = 0;
+		for (ListNode<T> node = head; node != null; node = node.next()) {
+			if (i++ == index) {
+				node.set(data);
+				break;
+			}
+		}
+	}
+	
 	public T remove(int removed) {
 		int i = 0;
 		ListNode<T> prev = null;
