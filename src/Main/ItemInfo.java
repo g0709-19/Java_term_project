@@ -157,6 +157,7 @@ public class ItemInfo {
 	private void handleBuyButton() {
 		if (beverage.isExist() && vender.canBuy(beverage)) {
 			beverage.buy();
+			vender.buy(beverage.getPrice());
 			System.out.printf("%s 가 판매됐어요 %d개 남았어요\n", beverage.getType(), beverage.getAmount());
 			updateAll(vender.getItemInfoes());
 		}
