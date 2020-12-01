@@ -95,11 +95,37 @@ public abstract class Money implements Cloneable {
 		}
 	}
 	
-	public static void subMoney(LinkedList<Money> money, int value) {
+	public static void addMoney(LinkedList<Money> money, LinkedList<Money> value) {
+		int size = money.size();
+		int value_size = value.size();
+		
+		for (int i=0; i<size; ++i) {
+			boolean b = false;
+			Money m = money.get(i);
+			
+			for (int j=0; j<value_size; ++j) {
+				Money value_m = value.get(j);
+				
+				if (m.price == value_m.price) {
+					m.amount += value_m.amount;
+					b = true;
+					break;
+				}
+			}
+			
+			if (b) break;
+		}
+	}
+	
+	public static LinkedList<Money> subMoney(LinkedList<Money> money, int value) {
 		// 자판기의 money 에서 빼올거고(거스름돈), inputed 에서도 빼올거
 		
+		LinkedList<Money> removed = new LinkedList<>();
+		
 		do {
-			for (int i=0, size=money.size(); i<size; ++i) {
+			int size = money.size();
+			// 화폐는 오름차순으로 정렬되어 있기 때문에 뒤에서 부터 보면서 빼는게 효율적
+			for (int i=size-1; i>=0; --i) {
 				Money m = money.get(i);
 				
 				int price = m.price;
@@ -113,21 +139,21 @@ public abstract class Money implements Cloneable {
 					value = 0;
 				}
 				else {
+					sub = amount;
 					amount = 0;
 					value -= amount * price;
 				}
 				
-				if (amount == 0) {
-					money.remove(i);
-					--i;
-				} else {
-					m.setAmount(amount);
-				}
+				removed.add(Money.createMoneyWithType(price, sub));
+				m.setAmount(amount);
 				
 				if (value == 0) break; // 다 뺏었음
 				else continue;
 			}
 		} while (value > 0);
+		
+
+		return removed;
 	}
 	
 	/*
