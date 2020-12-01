@@ -16,6 +16,7 @@ import javax.swing.border.EmptyBorder;
 
 import DataStructure.LinkedList;
 import Money.Money;
+import javax.swing.JTable;
 
 public class Vender extends JFrame {
 	
@@ -50,6 +51,7 @@ public class Vender extends JFrame {
 	private LinkedList<JLabel> input_money_labels;
 	private LinkedList<ItemInfo> item_info_components;
 	private JPanel input_money_pannel;
+	private JLabel can_change_label;
 	
 	
 	public Vender() {
@@ -111,6 +113,14 @@ public class Vender extends JFrame {
 		
 		// 아이템 정보 담을 리스트 초기화
 		initItemInfoComponent(item_display_panel);
+		
+		JPanel can_change_panel = new JPanel();
+		can_change_panel.setBounds(291, 304, 93, 32);
+		contentPane.add(can_change_panel);
+		
+		can_change_label = new JLabel("");
+		can_change_label.setHorizontalAlignment(SwingConstants.CENTER);
+		can_change_panel.add(can_change_label);
 		
 		// 거스름돈 초기화
 		initMoney();
@@ -182,6 +192,16 @@ public class Vender extends JFrame {
 			JLabel label = input_money_labels.get(i);
 			int amount = Money.getMoneyAmount(money, Money.money_unit[i]);
 			label.setText(String.valueOf(amount));
+		}
+	}
+	
+	private void displayChangeMoney(boolean value) {
+		//int money = Money.getFullPrice(money);
+		
+		if (value) {
+			can_change_label.setText("거스름돈X");
+		} else {
+			can_change_label.setText("");
 		}
 	}
 	
@@ -281,14 +301,41 @@ public class Vender extends JFrame {
 		return item_info_components;
 	}
 	
-	public void buy() {
-		
+	public void buy(int price) {
+		int change = Money.getFullPrice(inputed) - price;
+		System.out.println("거스름돈은 " + change);
+		//Money.addChange(money, price);		// 음료를 샀으므로 자판기가 돈을 먹음
+		Money.subMoney(money, price - change);	// 거스름돈을 자판기에서 뺌, money 에 값 추가하고 빼는 것보다 가격에서 거스름돈 뺀 값을 빼는게 효율적
+		initInputedMoney();
+		Money.addChange(inputed, change);	// 입력금액에 거스름돈 넣어줌
+		displayInputedMoney();
 	}
 	
 	public boolean canBuy(Beverage b) {
 		if (inputed == null) return false;
-		int full = Money.getFullPrice(inputed);
-		return full >= b.getPrice();
+		int full = Money.getFullPrice(inputed);			// 입력된 금액이 충족하는지 체크
+		return full >= b.getPrice() && canChange(b);
+	}
+	
+	public boolean canChange(Beverage b) {
+		
+		boolean can = false;
+		do {
+			if (money == null) break;
+			
+			int full = Money.getFullPrice(inputed);		// 입력된 금액이 충족하는지 체크
+			if (full < b.getPrice()) break;
+			
+			int full_change = Money.getFullPrice(money) + b.getPrice();	// 자판기에 거스름돈 있는지 체크
+			
+			if (full_change < (full - b.getPrice())) break;
+			
+			can = true;
+			break;
+		} while(true);
+		
+		displayChangeMoney(!can);
+		return can;
 	}
 	
 	/* 금액 입력 버튼 이벤트 추가 */
