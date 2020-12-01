@@ -15,7 +15,7 @@ public class Queue<T> {
     public void enqueue(T data) {
     	ListNode<T> node = new ListNode<T>(data);
         
-    	if (empty()) {
+    	if (isEmpty()) {
         	front = node;
         }
         else {
@@ -27,7 +27,7 @@ public class Queue<T> {
     }
 
     public T dequeue() {
-    	if (empty())
+    	if (isEmpty())
     		return null;
     	else {
     		T temp = front.get();
@@ -57,7 +57,7 @@ public class Queue<T> {
 //        return -1;
 //    }
 
-    private boolean empty() {
+    public boolean isEmpty() {
         return size == 0;
     }
     
