@@ -10,15 +10,20 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import DataStructure.LinkedList;
 import Money.Money;
-import javax.swing.JTable;
+import Operator.Opeartor;
+import Operator.Password;
 
 public class Vender extends JFrame {
+	
+	public static Vender vender = null;
 	
 	/* 상수 */
 	private static final long serialVersionUID = 1L;
@@ -33,6 +38,8 @@ public class Vender extends JFrame {
 	
 	private static final int INPUT_BILL_LIMIT = 3000;
 	private static final int INPUT_FULL_LIMIT = 5000;
+
+	private static final String DEFAULT_PASSWORD = "1@000000";
 	
 	public static final Font DEFAUlT_FONT = new Font("맑은 고딕", Font.PLAIN, 12);
 	
@@ -53,8 +60,16 @@ public class Vender extends JFrame {
 	private JPanel input_money_pannel;
 	private JLabel can_change_label;
 	
+	/* 자판기 관리자 비밀번호 */
+	private Password password;
 	
-	public Vender() {
+	
+	private static void create() {
+		if (vender == null)
+			vender = new Vender();
+	}
+	
+	private Vender() {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 402, 490);
@@ -122,6 +137,24 @@ public class Vender extends JFrame {
 		can_change_label.setHorizontalAlignment(SwingConstants.CENTER);
 		can_change_panel.add(can_change_label);
 		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(291, 343, 93, 38);
+		contentPane.add(panel_1);
+		
+		JButton btnNewButton_1 = new JButton("\uAD00\uB9AC\uC790");
+		panel_1.add(btnNewButton_1);
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				handleOperatorButton();
+			}
+		});
+		
+		JLabel label = new JLabel("");
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		panel_1.add(label);
+		
+		password = new Password(DEFAULT_PASSWORD);
+		
 		// 거스름돈 초기화
 		initMoney();
 		
@@ -156,6 +189,10 @@ public class Vender extends JFrame {
 	
 	public LinkedList<Money> getInputedMoney() {
 		return inputed;
+	}
+	
+	public LinkedList<Money> getMoney() {
+		return money;
 	}
 	
 	private void updateItemInfoComponent() {
@@ -257,7 +294,7 @@ public class Vender extends JFrame {
 	/* 거스름돈 초기화(default) */
 	private void initMoney() {
 		money = new LinkedList<>();
-		Money.initMoneyList(money, 5);
+		Money.initMoneyList(money, DEFAULT_CHANGE_AMOUNT);
 		
 		System.out.printf("자판기는 총 %,3d원b 을 가지고 있습니다\n", Money.getFullPrice(money));
 	}
@@ -304,8 +341,22 @@ public class Vender extends JFrame {
 	public void buy(int price) {
 		int change = Money.getFullPrice(inputed) - price;
 		System.out.println("거스름돈은 " + change);
-		//Money.addChange(money, price);		// 음료를 샀으므로 자판기가 돈을 먹음
-		Money.subMoney(money, price - change);	// 거스름돈을 자판기에서 뺌, money 에 값 추가하고 빼는 것보다 가격에서 거스름돈 뺀 값을 빼는게 효율적
+		
+		LinkedList<Money> price_money = Money.subMoney(inputed, price);
+		
+		System.out.printf("[1] money: %d\n", Money.getFullPrice(money));
+		
+		if (Money.getFullPrice(price_money) != price) {
+			Money.addChange(money, price);
+			System.out.println("aaaaaaaaaa "+price);
+		}
+		else
+			Money.addMoney(money, price_money);		// 음료를 샀으므로 자판기가 돈을 먹음
+		
+		System.out.printf("[2] money: %d\n", Money.getFullPrice(money));
+		Money.subMoney(money, change);	// 거스름돈을 자판기에서 뺌, money 에 값 추가하고 빼는 것보다 가격에서 거스름돈 뺀 값을 빼는게 효율적
+		System.out.printf("[3] money: %d\n", Money.getFullPrice(money));
+		
 		initInputedMoney();
 		Money.addChange(inputed, change);	// 입력금액에 거스름돈 넣어줌
 		displayInputedMoney();
@@ -371,18 +422,65 @@ public class Vender extends JFrame {
 	
 	/////////////////////////////////////////////
 	
-	/* 금액 입력 버튼 */
-	public void handleInputMoney() {
+	private void handleOperatorButton() {
 		
+		boolean isCorrect = true;
+		do {
+			int result = showPasswordInput(isCorrect);
+			if (result < 0)
+				isCorrect = false;
+			else if (result == 0)
+				return;
+		}
+		while (!isCorrect);
+		
+		Opeartor operator = new Opeartor();
+		setContentPane(operator);
+		revalidate();
+		repaint();
+	}
+	
+	private int showPasswordInput(boolean isCorrect) {
+		JPanel panel = new JPanel();
+		
+		String msg = isCorrect ? "관리자 비밀번호를 입력해주세요." : "알맞은 비밀번호를 입력해주세요.";
+		JLabel label = new JLabel(msg);
+		JPasswordField pass = new JPasswordField(10);
+		panel.add(label);
+		panel.add(pass);
+		String[] options = new String[]{"확인", "취소"};
+		int option = JOptionPane.showOptionDialog(null, panel, "관리자 비밀번호 입력",
+		                            JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+		                            null, options, options[1]);
+		
+		if(option == 0) // 확인버튼 눌렀을 때
+		{
+		       String password = new String(pass.getPassword());
+		       
+		       if (this.password.equals(password))
+		    	   return 1;
+		       else
+		    	   return -1;
+		}
+		
+		return 0;
+	}
+	
+	public Password getPassword() {
+		return password;
 	}
 	
 	/////////////////////////////////////////////
+	
+	public JPanel getContentPane() {
+		return contentPane;
+	}
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					new Vender();		// 자판기 창 생성
+					Vender.create();		// 자판기 창 생성
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
