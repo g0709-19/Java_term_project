@@ -96,7 +96,67 @@ public abstract class Money implements Cloneable {
 	}
 	
 	public static void subMoney(LinkedList<Money> money, int value) {
-		// 힙 정렬 사용하고 큰거 순서대로 빼주면 될듯
+		// 자판기의 money 에서 빼올거고(거스름돈), inputed 에서도 빼올거
+		
+		do {
+			for (int i=0, size=money.size(); i<size; ++i) {
+				Money m = money.get(i);
+				
+				int price = m.price;
+				int amount = m.amount;
+				
+				// 가져갈 값을 Money 의 가격으로 나눠서 그게 개수보다 작거나 같으면 개수를 빼면되고
+				// 개수보다 크다면 Money 는 없애버리고 새로운 Money 를 찾으러 간다
+				int sub = value/price;
+				if (sub <= amount) {
+					amount -= sub;
+					value = 0;
+				}
+				else {
+					amount = 0;
+					value -= amount * price;
+				}
+				
+				if (amount == 0) {
+					money.remove(i);
+					--i;
+				} else {
+					m.setAmount(amount);
+				}
+				
+				if (value == 0) break; // 다 뺏었음
+				else continue;
+			}
+		} while (value > 0);
+	}
+	
+	/*
+	 * 금액을 1000부터 내림차순으로 나눠서 몇번 나눠지는지(몫) 으로 Money 생성하고
+	 * 몫 * 금액을 value 에서 빼준다! 그리고 나머지가 있는지 검사해서 있으면 반복하고
+	 * 나머지가 없다면 그대로 거스름돈 반환!
+	 */
+	public static LinkedList<Money> addChange(LinkedList<Money> money, int value) {
+		int prices[] = { 1000, 500, 100, 50, 10 };
+		
+		int mok;
+		int namoji;
+		
+		for (int i=0; i<prices.length; ++i) {
+			int price = prices[i];
+			if (value < price) continue;
+			
+			mok = value / price;
+			namoji = value % price;
+			
+			for (int j=0; j<mok; ++j)
+				Money.addMoney(money, price);
+			
+			value -= mok * price;
+			
+			if (namoji == 0) break;
+		}
+		
+		return money;
 	}
 	
 	public static void initMoneyList(LinkedList<Money> list, int amount) {
