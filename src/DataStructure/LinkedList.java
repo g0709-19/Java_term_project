@@ -2,16 +2,17 @@ package DataStructure;
 
 public class LinkedList<T> {
 	
-	private int size;
 	private ListNode<T> head;
 	private ListNode<T> last;
 	
 	public LinkedList() {
-		size = 0;
 		head = last = null;
 	}
 	
 	public int size() {
+		int size = 0;
+    	for (ListNode<T> node = head; node != null; node = node.next())
+    		++size;
 		return size;
 	}
 	
@@ -25,8 +26,6 @@ public class LinkedList<T> {
 			last.link(node);
 			last = node;
 		}
-		
-		++size;
 	}
 	
 	public void set(int index, T data) {
@@ -53,7 +52,6 @@ public class LinkedList<T> {
 				if (prev != null)
 					prev.link(next);
 
-				--size;
 				return temp;
 			}
 			
@@ -83,7 +81,9 @@ public class LinkedList<T> {
 	
     public T get(int search) {
     	int i = 0;
+    	//System.out.println("get 을 하려는데 사이즈가 "+size+" 찾으려는건 " + search);
     	for (ListNode<T> node = head; node != null; node = node.next()) {
+    		//System.out.printf("i: %d, search: %d\n", i, search);
     		if (i == search)
     			return node.get();
     		++i;

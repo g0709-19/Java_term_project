@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import DataStructure.LinkedList;
+import DataStructure.MaxHeap;
 import Money.Money;
 
 public class Vender extends JFrame {
@@ -41,7 +42,7 @@ public class Vender extends JFrame {
 	// 음료 목록 리스트 나중에 큐로 구현해야됨
 	private LinkedList<Beverage> beverages;
 	private LinkedList<Money> money;
-	private LinkedList<Money> inputed;
+	private MaxHeap<Money> inputed;
 	
 	/* GUI 컴포넌트 */
 	private JPanel contentPane;
@@ -187,6 +188,7 @@ public class Vender extends JFrame {
 	
 	/* 금액 입력 버튼 클릭 시 이벤트 */
 	private void handleInputMoney(int value) {
+		System.out.println("입력됩니다용 " + value);
 		if (user.hasMoney(value) && addInputMoney(value)) {
 			user.takeMoney(value);
 			displayInputedMoney();
@@ -198,9 +200,13 @@ public class Vender extends JFrame {
 	}
 	
 	private void returnMoney() {
-		for (;inputed.size() > 0;) {
-			Money m = inputed.remove(0);
-			if (m.getAmount() <= 0) continue;
+		System.out.println("출력먽저!!");
+		System.out.println("!!!!!!!!!!!!!");
+		for (int i=1; i<inputed.size(); ++i)
+			System.out.println(inputed.get(i).getPrice() + " " + inputed.get(i).getAmount());
+		for (;inputed.size()-1 > 0;) {
+			Money m = inputed.delete();
+			//if (m.getAmount() <= 0) continue;
 			System.out.printf("인출 %d %d\n", m.getPrice(), m.getAmount());
 			
 			LinkedList<Money> user_money = user.getMoney();
@@ -244,8 +250,8 @@ public class Vender extends JFrame {
 	
 	/* 입력 금액 초기화 */
 	private void initInputedMoney() {
-		inputed = new LinkedList<>();
-		Money.initMoneyList(inputed, 0);
+		inputed = new MaxHeap<>();
+		//Money.initMoneyList(inputed, 0);
 		
 		System.out.printf("입력금액 총 %,3d원b 을 가지고 있습니다\n", Money.getFullPrice(inputed));
 	}
@@ -281,8 +287,17 @@ public class Vender extends JFrame {
 		return item_info_components;
 	}
 	
-	public void buy() {
-		
+	public void buy(int value) {
+		LinkedList<Money> money = Money.subMoney(inputed, value);	// 거스름돈 반환
+		inputed = (MaxHeap<Money>) money;
+//		if (money != null) {
+//			for (int i=0, size=money.size(); i<size; ++i) {
+//				Money m = money.get(i);
+//				System.out.println("얼마게? " + m.getPrice() + " " + m.getAmount() + "\n인덱스: "+inputed.size());
+//				inputed.insert(m);
+//			}			
+//		}
+		displayInputedMoney();
 	}
 	
 	public boolean canBuy(Beverage b) {
@@ -320,13 +335,6 @@ public class Vender extends JFrame {
 			}
 			
 		}
-	}
-	
-	/////////////////////////////////////////////
-	
-	/* 금액 입력 버튼 */
-	public void handleInputMoney() {
-		
 	}
 	
 	/////////////////////////////////////////////
