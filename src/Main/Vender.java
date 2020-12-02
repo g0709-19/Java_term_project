@@ -1,6 +1,7 @@
 package Main;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -18,7 +19,7 @@ import javax.swing.border.EmptyBorder;
 
 import DataStructure.LinkedList;
 import Money.Money;
-import Operator.Opeartor;
+import Operator.Operator;
 import Operator.Password;
 
 public class Vender extends JFrame {
@@ -338,6 +339,10 @@ public class Vender extends JFrame {
 		return item_info_components;
 	}
 	
+	public LinkedList<Beverage> getBeverages() {
+		return beverages;
+	}
+	
 	public void buy(int price) {
 		int change = Money.getFullPrice(inputed) - price;
 		System.out.println("°Å½º¸§µ·Àº " + change);
@@ -434,10 +439,8 @@ public class Vender extends JFrame {
 		}
 		while (!isCorrect);
 		
-		Opeartor operator = new Opeartor();
+		Operator operator = Operator.create();
 		setContentPane(operator);
-		revalidate();
-		repaint();
 	}
 	
 	private int showPasswordInput(boolean isCorrect) {
@@ -472,8 +475,19 @@ public class Vender extends JFrame {
 	
 	/////////////////////////////////////////////
 	
+	private void updateScreen() {
+		revalidate();
+		repaint();
+	}
+	
 	public JPanel getContentPane() {
 		return contentPane;
+	}
+	
+	@Override
+	public void setContentPane(Container contentPane) {
+		super.setContentPane(contentPane);
+		updateScreen();
 	}
 	
 	public static void main(String[] args) {
