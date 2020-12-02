@@ -15,14 +15,23 @@ import javax.swing.border.EmptyBorder;
 import DataStructure.LinkedList;
 import Main.Vender;
 import Money.Money;
+import Operator.ItemInfo.ItemCustomWindow;
 
-public class Opeartor extends JPanel {
+public class Operator extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel money_panel;
 	private LinkedList<MoneyPanel> money_panels;
 	
-	public Opeartor() {
+	public static Operator operator; 
+	
+	public static Operator create() {
+		if (operator == null)
+			operator = new Operator();
+		return operator;
+	}
+	
+	private Operator() {
 		
 		setBounds(100, 100, 402, 490);
 		
@@ -43,7 +52,7 @@ public class Opeartor extends JPanel {
 		panel_6.setBounds(12, 351, 368, 39);
 		panel_1.add(panel_6);
 		
-		JButton btnNewButton_2 = new JButton("\uC218\uAE08");
+		JButton btnNewButton_2 = new JButton("수금");
 		btnNewButton_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				handleGetMoney();
@@ -67,9 +76,14 @@ public class Opeartor extends JPanel {
 		panel_3.add(btnNewButton);
 		
 		JButton btnNewButton_1 = new JButton("물건 커스터마이징");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				handleCustomInfo();
+			}
+		});
 		panel_3.add(btnNewButton_1);
 		
-		JButton return_to_vender = new JButton("\uB3CC\uC544\uAC00\uAE30");
+		JButton return_to_vender = new JButton("돌아가기");
 		return_to_vender.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				handleReturnToVender();
@@ -78,7 +92,7 @@ public class Opeartor extends JPanel {
 		return_to_vender.setBounds(12, 10, 93, 23);
 		panel_1.add(return_to_vender);
 		
-		JButton button = new JButton("\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD");
+		JButton button = new JButton("비밀번호 변경");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				handleChangePassword();
@@ -100,6 +114,12 @@ public class Opeartor extends JPanel {
 		} while (!(canChange = pw.canChange(input)));
 		
 		return input;
+	}
+	
+	// 물건 커스터마이징 버튼 클릭 시 이벤트
+	private void handleCustomInfo() {
+		ItemCustomWindow window = new ItemCustomWindow();
+		Vender.vender.setContentPane(window);
 	}
 	
 	// 비밀번호 변경 버튼 클릭 시 이벤트
