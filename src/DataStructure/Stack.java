@@ -16,7 +16,7 @@ public class Stack<T> {
 
     public T pop() {
     	if (empty())
-    		throw new ArrayIndexOutOfBoundsException();
+    		return null;
     	else {
     		T temp = top.get();
     		top = top.next();
