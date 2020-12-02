@@ -16,6 +16,7 @@ import DataStructure.LinkedList;
 import Main.Vender;
 import Money.Money;
 import Operator.ItemInfo.ItemCustomWindow;
+import Operator.Sales.SalesWindow;
 
 public class Operator extends JPanel {
 	
@@ -33,7 +34,7 @@ public class Operator extends JPanel {
 	
 	private Operator() {
 		
-		setBounds(100, 100, 402, 490);
+		//setBounds(100, 100, 402, 490);
 		
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -73,6 +74,11 @@ public class Operator extends JPanel {
 		panel_4.add(panel_3);
 		
 		JButton btnNewButton = new JButton("일별/월별 매출산출");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				handleSales();
+			}
+		});
 		panel_3.add(btnNewButton);
 		
 		JButton btnNewButton_1 = new JButton("물건 커스터마이징");
@@ -114,6 +120,12 @@ public class Operator extends JPanel {
 		} while (!(canChange = pw.canChange(input)));
 		
 		return input;
+	}
+	
+	// 일별/월별 매출 버튼 클릭 시 이벤트
+	private void handleSales() {
+		SalesWindow window = SalesWindow.create();
+		Vender.vender.setContentPane(window);
 	}
 	
 	// 물건 커스터마이징 버튼 클릭 시 이벤트

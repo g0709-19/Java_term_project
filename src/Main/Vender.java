@@ -196,7 +196,7 @@ public class Vender extends JFrame {
 		return money;
 	}
 	
-	private void updateItemInfoComponent() {
+	public void updateItemInfoComponent() {
 		ItemInfo.updateAll(item_info_components);
 	}
 	
@@ -440,6 +440,7 @@ public class Vender extends JFrame {
 		while (!isCorrect);
 		
 		Operator operator = Operator.create();
+		operator.updateMoneyPanel(money);	// 자판기 소지 금액 업데이트
 		setContentPane(operator);
 	}
 	
