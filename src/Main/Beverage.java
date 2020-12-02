@@ -38,6 +38,10 @@ public class Beverage {
 		return amount;
 	}
 	
+	public void setAmount(int value) {
+		amount = value;
+	}
+	
 	// 재고가 없으면 false
 	public boolean isExist() {
 		boolean is_exist = amount > 0;
