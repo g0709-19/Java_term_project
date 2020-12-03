@@ -192,6 +192,7 @@ public class Operator extends JPanel {
 		}
 		
 		updateMoneyPanel(money);
+		Vender.vender.displayChangeMoney(false);	// 거스름돈 부족 표시 제거
 	}
 	
 	public void updateMoneyPanel(LinkedList<Money> money) {

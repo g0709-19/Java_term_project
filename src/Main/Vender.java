@@ -234,7 +234,7 @@ public class Vender extends JFrame {
 		}
 	}
 	
-	private void displayChangeMoney(boolean value) {
+	public void displayChangeMoney(boolean value) {
 		//int money = Money.getFullPrice(money);
 		
 		if (value) {
