@@ -41,22 +41,6 @@ public class Queue<T> {
         return front.get();
     }
 
-//    public int search(T item) {
-//    	ListNode<T> search = top;
-//        int index = 1;
-//        while(true) {
-//            if (search.get() == item) {
-//                return index;
-//            } else {
-//            	search = search.next();
-//                ++index;
-//                if (search == null)
-//                    break;
-//            }
-//        }
-//        return -1;
-//    }
-
     public boolean isEmpty() {
         return size == 0;
     }

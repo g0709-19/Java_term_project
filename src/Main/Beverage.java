@@ -90,7 +90,6 @@ public class Beverage {
 			
 			String date = LocalDate.now().toString();
 			
-			System.out.println(type + "재고 소진됐어요");
 			writer.write(String.format("%s %s %d 재고 소진\n", date, type, price));
 			
 			writer.close();

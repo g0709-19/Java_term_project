@@ -22,7 +22,6 @@ public class User {
 			Money m = money.get(i);
 			System.out.printf("%d %d\n", m.getPrice(), m.getAmount());
 			if (m.getPrice() == value && m.getAmount() >= 1) {
-				System.out.println("±â¸ð·ò");
 				return true;
 			}
 		}

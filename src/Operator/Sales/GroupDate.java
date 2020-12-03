@@ -7,8 +7,6 @@ import DataStructure.TreeNode;
 // SalesItem 을 날짜별로 묶음
 public class GroupDate implements Comparable<GroupDate> {
 	
-	//private static int ATTRIBUTE_LENGTH = 5;
-	
 	private String year_month;
 	private BinarySearchTree<SalesItem> items;
 	

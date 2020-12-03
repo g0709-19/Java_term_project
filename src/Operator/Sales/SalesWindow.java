@@ -34,8 +34,6 @@ public class SalesWindow extends JPanel {
 	private static final long serialVersionUID = 1L;
 	public static SalesWindow sales_window;
 	
-	private static int ATTRIBUTE_LENGTH = 5;
-	
 	private JPanel contentPane;
 	private JScrollPane scrollPane;
 	private JLabel date_label;
@@ -105,7 +103,7 @@ public class SalesWindow extends JPanel {
 		JTable table = createTableWithDate(date_label.getText());
 		
 		scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(12, 43, 366, 427);
+		scrollPane.setBounds(12, 43, 366, 404);
 		contentPane.add(scrollPane);
 	}
 	
@@ -537,7 +535,6 @@ public class SalesWindow extends JPanel {
 				
 				insertToGroupDate(date, type, price, amount);
 				insertToGroupBeverage(date, type, price, amount);
-				//insertToSalesItems(date, type, price, amount);
 			}
 			
 			reader.close();

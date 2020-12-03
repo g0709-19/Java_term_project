@@ -118,6 +118,7 @@ public class Option extends JPanel {
 		});
 		add(button);
 		
+		Vender.vender.saveBeverages();
 		updateScreen();
 		Vender.vender.updateItemInfoComponent();	// 수정된 사항 아이템 진열대에 반영
 	}

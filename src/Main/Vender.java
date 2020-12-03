@@ -6,6 +6,13 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -49,7 +56,6 @@ public class Vender extends JFrame {
 	/* 사용자 */
 	private User user;
 	
-	// 음료 목록 리스트 나중에 큐로 구현해야됨
 	private LinkedList<Beverage> beverages;
 	private LinkedList<Money> money;
 	private LinkedList<Money> inputed;
@@ -277,21 +283,104 @@ public class Vender extends JFrame {
 	/* 음료 재고 초기화(default) */
 	
 	private void initBeverages() {
+		
 		beverages = new LinkedList<>();
-		Beverage b;
+		
 		String[] paths = new String[] {
 			"chamdasu.jpg", "coffee.jpg", "pocari.jpg", "classy_coffee.jpg", "cola.jpg"	
 		};
-		String[] types = new String[] {
-				"물", "커피", "이온음료", "고급커피", "탄산음료"
-		};
-		Integer[] prices = new Integer[] {
-				450, 500, 550, 700, 750
-		};
-		for (int i=0; i<types.length; ++i) {
-			b = new Beverage(paths[i], types[i], prices[i]);
-			beverages.add(b);
+		
+		File file = new File(".\\src\\data\\beverages.txt");
+		
+		// 저장된 음료 정보가 있다면 그 정보로 불러옴
+		if (file.exists()) {
+			
+			int i = 0;
+			
+			try {
+				FileReader reader_f = new FileReader(file);
+				BufferedReader reader;
+				reader = new BufferedReader(reader_f);
+			
+				String current = null;
+				
+				// 파일의 끝까지 검사
+				while ((current = reader.readLine()) != null) {
+					String[] token = current.split(" ");	// 품목, 단가, 개수로 분리
+					
+					String type = token[0];
+					int price = Integer.parseInt(token[1]);
+					int amount = Integer.parseInt(token[2]);
+					
+					Beverage b = new Beverage(paths[i], type, price);
+					b.setAmount(amount);
+					
+					beverages.add(b);
+					++i;
+				}
+				
+				reader.close();
+				reader_f.close();
+
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+			
+		// 음료 정보가 없다면 기본값으로 초기화
+		} else {
+
+			String[] types = new String[] {
+					"물", "커피", "이온음료", "고급커피", "탄산음료"
+			};
+			Integer[] prices = new Integer[] {
+					450, 500, 550, 700, 750
+			};
+			for (int i=0; i<types.length; ++i) {
+				Beverage b = new Beverage(paths[i], types[i], prices[i]);
+				beverages.add(b);
+			}
+			
 		}
+		
+	}
+	
+	/* 음료 정보 저장 */
+	public void saveBeverages() {
+		
+		File file = new File(".\\src\\data\\beverages.txt");
+		
+		try {
+			FileWriter writer_f = new FileWriter(file, false);
+			BufferedWriter writer;
+			writer = new BufferedWriter(writer_f);
+			
+			/* 실행부분 */
+			
+			for (int i=0, size=beverages.size(); i<size; ++i) {
+				
+				Beverage b = beverages.get(i);
+				
+				// 이름 가격 재고
+				String type = b.getType();
+				int price = b.getPrice();
+				int amount = b.getAmount();
+				
+				writer.write(String.format("%s %d %d\n", type, price, amount));
+			}
+			
+			writer.close();
+			writer_f.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	/* 거스름돈 초기화(default) */
@@ -501,8 +590,7 @@ public class Vender extends JFrame {
 					SalesWindow.create();	// 자판기 관리자 매출산출 창 생성(먼저 생성해두어야 자판기의 매출이 반영됨)
 					Vender.create();		// 자판기 창 생성
 					
-					Thread sales_save_thread = new SalesSaveThread(10000);	// 10초마다 매출 정보 저장
-					
+					Thread sales_save_thread = new SalesSaveThread(10000);			// 10초마다 매출 정보 저장
 					sales_save_thread.start();
 					
 				} catch (Exception e) {
