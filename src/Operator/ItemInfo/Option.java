@@ -24,7 +24,7 @@ public class Option extends JPanel {
 	private JLabel label;
 	private JButton button;
 	
-	private boolean inputing;
+	//private boolean inputing;
 	
 	private JTextField text_field;
 	
@@ -32,7 +32,7 @@ public class Option extends JPanel {
 		
 		this.parent = parent;
 		
-		inputing = false;
+		//inputing = false;
 		this.option = option;
 		this.button_text = button_text;
 		
@@ -54,7 +54,7 @@ public class Option extends JPanel {
 	}
 	
 	private void setInputing(boolean value) {
-		inputing = value;
+		//inputing = value;
 	}
 	
 	// 수정, 보충 버튼 눌렀을 시 이벤트
