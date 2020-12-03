@@ -1,5 +1,12 @@
 package Main;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+
+import Operator.Sales.SalesWindow;
+
 public class Beverage {
 	
 	private String type;
@@ -29,6 +36,11 @@ public class Beverage {
 	public boolean buy() {
 		if (isExist()) {
 			--amount;
+			SalesWindow.sales_window.insertToSalesList(this);	// 매출 기록
+			
+			// 품절 시 파일 출력
+			if (amount <= 0)
+				saveSoldOut();
 			return true;
 		}
 		return false;
@@ -66,5 +78,25 @@ public class Beverage {
 	
 	public String getPath() {
 		return path;
+	}
+	
+	private void saveSoldOut() {
+		
+		File file = new File(".\\src\\data\\soldout.txt");
+		
+		try {
+			
+			FileWriter writer = new FileWriter(file, true);
+			
+			String date = LocalDate.now().toString();
+			
+			System.out.println(type + "재고 소진됐어요");
+			writer.write(String.format("%s %s %d 재고 소진", date, type, price));
+			
+			writer.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
