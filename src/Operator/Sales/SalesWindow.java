@@ -4,9 +4,11 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 
@@ -31,6 +33,8 @@ public class SalesWindow extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 	public static SalesWindow sales_window;
+	
+	private static int ATTRIBUTE_LENGTH = 5;
 	
 	private JPanel contentPane;
 	private JScrollPane scrollPane;
@@ -433,9 +437,86 @@ public class SalesWindow extends JPanel {
 		}
 	}
 	
+	public void save() {
+		
+		File file = new File(".\\src\\data\\sales.txt");
+		
+		try {
+			FileWriter writer_f = new FileWriter(file, false);
+			BufferedWriter writer;
+			writer = new BufferedWriter(writer_f);
+			
+			TreeNode<GroupDate> root = sales_items_grouped_date.getRoot();
+			Stack<TreeNode<GroupDate>> stack = new Stack<>();
+			TreeNode<GroupDate> temp = root;
+			
+			// 중위 순회
+			while (true) {
+				while (temp != null) {
+					stack.push(temp);
+					temp = temp.getLeft();
+				}
+				
+				temp = stack.pop();
+				if (temp == null) break;
+				
+				/* 실행부분 */
+				
+				BinarySearchTree<SalesItem> items = temp.getData().getItems();
+
+				TreeNode<SalesItem> _root = items.getRoot();
+				Stack<TreeNode<SalesItem>> _stack = new Stack<>();
+				TreeNode<SalesItem> _temp = _root;
+				
+				// 중위 순회
+				while (true) {
+					while (_temp != null) {
+						_stack.push(_temp);
+						_temp = _temp.getLeft();
+					}
+					
+					_temp = _stack.pop();
+					if (_temp == null) break;
+					
+					/* 실행부분 */
+					
+					String[][] item = _temp.getData().toRow();	// 날짜 품목 단가 개수
+					for (int i=0; i<item.length; ++i) {
+						// 마지막 항목인 매출은 빼고 추가
+						String[] info = item[i];
+						
+						String date = info[0];
+						String type = info[1];
+						String price = info[2];
+						String amount = info[3];
+						
+						writer.write(String.format("%s %s %s %s\n", date, type, price, amount));
+					}
+					
+					/*****************************/
+					
+					_temp = _temp.getRight();
+				}
+
+				
+				/*****************************/
+				
+				temp = temp.getRight();
+			}
+			
+			writer.close();
+			writer_f.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	private void load() {
 		
-		System.out.println("나의 상대경로는 " + new File("").getAbsolutePath());
 		File file = new File(".\\src\\data\\sales.txt");
 		
 		try {

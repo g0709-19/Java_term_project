@@ -21,6 +21,7 @@ import DataStructure.LinkedList;
 import Money.Money;
 import Operator.Operator;
 import Operator.Password;
+import Operator.Sales.SalesSaveThread;
 import Operator.Sales.SalesWindow;
 
 public class Vender extends JFrame {
@@ -496,8 +497,14 @@ public class Vender extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					
 					SalesWindow.create();	// 자판기 관리자 매출산출 창 생성(먼저 생성해두어야 자판기의 매출이 반영됨)
 					Vender.create();		// 자판기 창 생성
+					
+					Thread sales_save_thread = new SalesSaveThread(10000);	// 10초마다 매출 정보 저장
+					
+					sales_save_thread.start();
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
