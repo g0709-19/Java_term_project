@@ -58,26 +58,21 @@ public class GroupDate implements Comparable<GroupDate> {
 				sum += sales;
 			}
 			
-			row = append(row, _row);	// 두 배열 합치는 함수
+			row = MyDate.append(row, _row);	// 두 배열 합치는 함수
 			
 			/*****************************/
 			
 			temp = temp.getRight();
 		}
 		
-		row = append(row, new String[][] {{
+		row = MyDate.append(row, new String[][] {{
 			null, null, null, null, String.valueOf(sum)
 		}});
 		
 		return row;
 	}
 	
-    public static String[][] append(String[][] a, String[][] b) {
-    	String[][] result = new String[a.length + b.length][];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
+
 	
 	public void insertToSalesItems(String date, String type, String price, String amount) {
 		SalesItem key = new SalesItem(date);
