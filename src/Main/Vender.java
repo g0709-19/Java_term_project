@@ -21,6 +21,7 @@ import DataStructure.LinkedList;
 import Money.Money;
 import Operator.Operator;
 import Operator.Password;
+import Operator.Sales.SalesWindow;
 
 public class Vender extends JFrame {
 	
@@ -495,6 +496,7 @@ public class Vender extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					SalesWindow.create();	// 자판기 관리자 매출산출 창 생성(먼저 생성해두어야 자판기의 매출이 반영됨)
 					Vender.create();		// 자판기 창 생성
 				} catch (Exception e) {
 					e.printStackTrace();
