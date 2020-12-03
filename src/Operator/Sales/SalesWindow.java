@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -34,8 +33,12 @@ public class SalesWindow extends JPanel {
 	
 	private JScrollPane scrollPane;
 	private JLabel date_label;
+	private JComboBox<String> beverage_combo_box;
+	
+	private boolean is_group_date;
 	
 	private BinarySearchTree<GroupDate> sales_items_grouped_date;
+	private BinarySearchTree<GroupBeverage> sales_items_grouped_beverage;
 
 	public static SalesWindow create() {
 		if (sales_window == null)
@@ -44,8 +47,10 @@ public class SalesWindow extends JPanel {
 	}
 	
 	private SalesWindow() {
-		
+
+		is_group_date = true;
 		initDateGroupedItems();
+		initBeverageGroupedItems();
 		load();
 		
 		setBounds(100, 100, 402, 490);
@@ -87,12 +92,11 @@ public class SalesWindow extends JPanel {
 			}
 		});
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"모두", "물"}));
-		comboBox.setBounds(269, 10, 107, 23);
-		panel_1.add(comboBox);
+		beverage_combo_box = createComboBox();
+		beverage_combo_box.setBounds(269, 10, 107, 23);
+		panel_1.add(beverage_combo_box);
 		
-		JTable table = createTable(date_label.getText());
+		JTable table = createTableWithDate(date_label.getText());
 		
 		scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(12, 43, 366, 427);
@@ -118,7 +122,53 @@ public class SalesWindow extends JPanel {
 		sales_items_grouped_date = new BinarySearchTree<>();
 	}
 	
-	private JTable createTable(String date) {
+	private void initBeverageGroupedItems() {
+		sales_items_grouped_beverage = new BinarySearchTree<>();
+	}
+	
+	private JComboBox<String> createComboBox() {
+		
+		TreeNode<GroupBeverage> root = sales_items_grouped_beverage.getRoot();
+		
+		Stack<TreeNode<GroupBeverage>> stack = new Stack<>();
+		
+		JComboBox<String> beverage_combo_box = new JComboBox<>();
+		beverage_combo_box.addItem("");	// 공백 선택 시 모든 음료 표시
+		
+		TreeNode<GroupBeverage> temp = root;
+		
+		// 중위 순회
+		while (true) {
+			while (temp != null) {
+				stack.push(temp);
+				temp = temp.getLeft();
+			}
+			
+			temp = stack.pop();
+			if (temp == null) break;
+			
+			/* 실행부분 */
+			
+			String type = temp.getData().getType();
+			beverage_combo_box.addItem(type);
+			
+			/*****************************/
+			
+			temp = temp.getRight();
+		}
+		
+		beverage_combo_box.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handleSelectBeverage();
+			}
+		});
+		
+		return beverage_combo_box;
+	}
+	
+	private JTable createTableWithDate(String date) {
 		
 		String[] attributes = new String[]{"날짜", "품목", "단가", "개수", "매출"};
 		String[][] contents = new String[][] {};
@@ -159,7 +209,7 @@ public class SalesWindow extends JPanel {
 				}
 				
 				// 날짜별로 테이블 만듬
-				contents = GroupDate.append(contents, temp.getData().toRow());
+				contents = MyDate.append(contents, temp.getData().toRow());
 				
 				/*****************************/
 				
@@ -168,7 +218,66 @@ public class SalesWindow extends JPanel {
 			
 		}
 		
-		contents = GroupDate.append(contents, new String[][] {{
+		contents = MyDate.append(contents, new String[][] {{
+			null, null, null, null, String.valueOf(sum)
+		}});
+		
+		JTable table = new JTable(contents, attributes);
+		table.setEnabled(false);
+		return table;
+	}
+	
+	private JTable createTableWithBeverage(String type) {
+		
+		String[] attributes = new String[]{"날짜", "품목", "단가", "개수", "매출"};
+		String[][] contents = new String[][] {};
+		
+		GroupBeverage key = new GroupBeverage(type);
+		GroupBeverage searched = sales_items_grouped_beverage.find(key);
+		
+		int sum = 0;
+		
+		if (searched != null) {
+			
+			TreeNode<SalesItem> root = searched.getItems().getRoot();
+			
+			Stack<TreeNode<SalesItem>> stack = new Stack<>();
+			
+			TreeNode<SalesItem> temp = root;
+			
+			
+			// 중위 순회
+			while (true) {
+				while (temp != null) {
+					stack.push(temp);
+					temp = temp.getLeft();
+				}
+				
+				temp = stack.pop();
+				if (temp == null) break;
+				
+				/* 실행부분 */
+				
+				// 날짜별로 테이블 만듬
+				String[][] _row = temp.getData().toRow();
+				
+				// 매출 계산
+				for (int i=0; i<_row.length; ++i) {
+					int sales = Integer.parseInt(_row[i][4]);
+					sum += sales;
+				}
+				
+				// 날짜별로 테이블 만듬
+				contents = MyDate.append(contents, temp.getData().toRow());
+				
+				/*****************************/
+				
+				temp = temp.getRight();
+			}
+			
+		}
+		
+		contents = MyDate.append(contents, new String[][] {{
 			null, null, null, null, String.valueOf(sum)
 		}});
 		
@@ -178,9 +287,17 @@ public class SalesWindow extends JPanel {
 	}
 	
 	private void updateTable() {
+
+		JTable table;
+		if (is_group_date) {
+			String date = date_label.getText();
+			table = createTableWithDate(date);
+		}
+		else {
+			String type = (String)beverage_combo_box.getSelectedItem();
+			table = createTableWithBeverage(type);
+		}
 		
-		String date = date_label.getText();
-		JTable table = createTable(date);
 		scrollPane.setViewportView(table);
 		
 		revalidate();
@@ -196,6 +313,26 @@ public class SalesWindow extends JPanel {
 		String[] _date = date.toString().split("-");	// 2020-12-03
 		
 		return String.format("%s-%s", _date[0], _date[1]);
+	}
+	
+	private void handleSelectBeverage() {
+		
+		String type = (String) beverage_combo_box.getSelectedItem();
+
+		switch (type) {
+		case "":	// 공백일 경우 모든 매출 표시
+			setGroupDateMode(true);
+			break;
+		default:	// 나머지의 경우 type 에 맞는 음료들 매출만 표시
+			setGroupDateMode(false);
+			break;
+		}
+		
+		updateTable();
+	}
+	
+	private void setGroupDateMode(boolean value) {
+		is_group_date = value;
 	}
 	
 	private void handlePrevious() {
@@ -246,13 +383,28 @@ public class SalesWindow extends JPanel {
 	}
 	
 	private void insertToGroupDate(String date, String type, String price, String amount) {
-		GroupDate key = new GroupDate(date);
+		GroupDate key = new GroupDate(date);	// 날짜별로 나눠야 되므로 date 을 넘겨줌
 		GroupDate searched = sales_items_grouped_date.find(key);
 		
 		// 찾아진게 없다면 삽입
 		if (searched == null) {
 			key.insertToSalesItems(date, type, price, amount);
 			sales_items_grouped_date.insert(key);
+		}
+		// 찾아진게 있다면 안에 있는 트리에 삽입
+		else {
+			searched.insertToSalesItems(date, type, price, amount);
+		}
+	}
+	
+	private void insertToGroupBeverage(String date, String type, String price, String amount) {
+		GroupBeverage key = new GroupBeverage(type);	// 음료별로 나눠야 되므로 type 을 넘겨줌
+		GroupBeverage searched = sales_items_grouped_beverage.find(key);
+		
+		// 찾아진게 없다면 삽입
+		if (searched == null) {
+			key.insertToSalesItems(date, type, price, amount);
+			sales_items_grouped_beverage.insert(key);
 		}
 		// 찾아진게 있다면 안에 있는 트리에 삽입
 		else {
@@ -282,6 +434,7 @@ public class SalesWindow extends JPanel {
 				String amount = token[3];
 				
 				insertToGroupDate(date, type, price, amount);
+				insertToGroupBeverage(date, type, price, amount);
 				//insertToSalesItems(date, type, price, amount);
 			}
 			
