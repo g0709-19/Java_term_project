@@ -239,42 +239,48 @@ public class SalesWindow extends JPanel {
 		
 		if (searched != null) {
 			
-			TreeNode<SalesItem> root = searched.getItems().getRoot();
+			String date = date_label.getText();
+			GroupDate _key = new GroupDate(date+"-01");
+			GroupDate _searched = searched.getItems().find(_key);
 			
-			Stack<TreeNode<SalesItem>> stack = new Stack<>();
-			
-			TreeNode<SalesItem> temp = root;
-			
-			
-			// 중위 순회
-			while (true) {
-				while (temp != null) {
-					stack.push(temp);
-					temp = temp.getLeft();
+			if (_searched != null) {
+				
+				TreeNode<SalesItem> root = _searched.getItems().getRoot();
+				
+				Stack<TreeNode<SalesItem>> stack = new Stack<>();
+				
+				TreeNode<SalesItem> temp = root;
+				
+				
+				// 중위 순회
+				while (true) {
+					while (temp != null) {
+						stack.push(temp);
+						temp = temp.getLeft();
+					}
+					
+					temp = stack.pop();
+					if (temp == null) break;
+					
+					/* 실행부분 */
+					
+					// 날짜별로 테이블 만듬
+					String[][] _row = temp.getData().toRow();
+					
+					// 매출 계산
+					for (int i=0; i<_row.length; ++i) {
+						int sales = Integer.parseInt(_row[i][4]);
+						sum += sales;
+					}
+					
+					// 날짜별로 테이블 만듬
+					contents = MyDate.append(contents, temp.getData().toRow());
+					
+					/*****************************/
+					
+					temp = temp.getRight();
 				}
-				
-				temp = stack.pop();
-				if (temp == null) break;
-				
-				/* 실행부분 */
-				
-				// 날짜별로 테이블 만듬
-				String[][] _row = temp.getData().toRow();
-				
-				// 매출 계산
-				for (int i=0; i<_row.length; ++i) {
-					int sales = Integer.parseInt(_row[i][4]);
-					sum += sales;
-				}
-				
-				// 날짜별로 테이블 만듬
-				contents = MyDate.append(contents, temp.getData().toRow());
-				
-				/*****************************/
-				
-				temp = temp.getRight();
 			}
-			
 		}
 		
 		contents = MyDate.append(contents, new String[][] {{

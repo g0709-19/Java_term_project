@@ -10,7 +10,7 @@ public class GroupBeverage implements Comparable<GroupBeverage> {
 	private static int ATTRIBUTE_LENGTH = 5;
 	
 	private String type;
-	private BinarySearchTree<SalesItem> items;
+	private BinarySearchTree<GroupDate> items;
 	
 	public GroupBeverage(String type) {
 		
@@ -18,7 +18,7 @@ public class GroupBeverage implements Comparable<GroupBeverage> {
 		items = new BinarySearchTree<>();
 	}
 	
-	public BinarySearchTree<SalesItem> getItems() {
+	public BinarySearchTree<GroupDate> getItems() {
 		return items;
 	}
 	
@@ -28,11 +28,11 @@ public class GroupBeverage implements Comparable<GroupBeverage> {
 		String[][] row = new String[][] {};
 		
 		//int i = 0;
-		TreeNode<SalesItem> root = items.getRoot();
+		TreeNode<GroupDate> root = items.getRoot();
 		
-		Stack<TreeNode<SalesItem>> stack = new Stack<>();
+		Stack<TreeNode<GroupDate>> stack = new Stack<>();
 		
-		TreeNode<SalesItem> temp = root;
+		TreeNode<GroupDate> temp = root;
 		
 		int sum = 0;
 		
@@ -72,57 +72,20 @@ public class GroupBeverage implements Comparable<GroupBeverage> {
 	}
 
 	public void insertToSalesItems(String date, String type, String price, String amount) {
-		SalesItem key = new SalesItem(date);
-		SalesItem searched = items.find(key);
+		GroupDate key = new GroupDate(date);
+		GroupDate searched = items.find(key);
 		
 		// 찾아진게 없다면 삽입
 		if (searched == null) {
-			key.insertToSalesItems(type, price, amount);
+			key.insertToSalesItems(date, type, price, amount);
 			items.insert(key);
-			System.out.println("4. " + date + " 추가");
 		}
 		// 찾아진게 있다면 안에 있는 트리에 삽입
 		else {
-			System.out.println("5. 찾아진 것은 " + searched.getDate().toString());
-			searched.insertToSalesItems(type, price, amount);
-			System.out.println("4. 기존에 있어서 " + date + " 에 " + type + " " + price + " " + amount + " 삽입");
+			searched.insertToSalesItems(date, type, price, amount);
 		}
 	}
 	
-	// 같은 달이면 삽입
-	public void insert(String date, String type, String price, String amount) {
-		SalesItem key = new SalesItem(date);
-		SalesItem searched = null;
-		
-		TreeNode<SalesItem> root = items.getRoot();
-		TreeNode<SalesItem> current = root;
-		
-		while (current != null) {
-			// 현재 노드 == 찾는 값
-			System.out.println("groupdate. " + current.getData().getDate().toString() + " " + current.getData().isSameMonth(key));
-			if (current.getData().isSameMonth(key)) {
-				searched = current.getData();
-				break;
-			}
-			// 현재 노드 > 찾는 값
-			else if (current.getData().compareTo(key) > 0)
-				current = current.getLeft();
-			// 현재 노드 < 찾는 값
-			else
-				current = current.getRight();
-		}
-		
-		// 찾아진게 없다면 삽입
-		if (searched == null) {
-			key.insertToSalesItems(type, price, amount);
-			items.insert(key);
-		}
-		// 찾아진게 있다면 안에 있는 트리에 삽입
-		else {
-			searched.insertToSalesItems(type, price, amount);
-		}
-	}
-
 	public String getType() {
 		return type;
 	}
