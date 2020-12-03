@@ -23,6 +23,7 @@ import javax.swing.border.EmptyBorder;
 import DataStructure.BinarySearchTree;
 import DataStructure.Stack;
 import DataStructure.TreeNode;
+import Main.Beverage;
 import Main.Vender;
 import Operator.Operator;
 
@@ -31,6 +32,7 @@ public class SalesWindow extends JPanel {
 	private static final long serialVersionUID = 1L;
 	public static SalesWindow sales_window;
 	
+	private JPanel contentPane;
 	private JScrollPane scrollPane;
 	private JLabel date_label;
 	private JComboBox<String> beverage_combo_box;
@@ -58,9 +60,9 @@ public class SalesWindow extends JPanel {
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
-		JPanel panel_1 = new JPanel();
-		add(panel_1);
-		panel_1.setLayout(null);
+		contentPane = new JPanel();
+		add(contentPane);
+		contentPane.setLayout(null);
 		
 		JButton return_to_operator = new JButton("돌아가기");
 		return_to_operator.addActionListener(new ActionListener() {
@@ -69,10 +71,10 @@ public class SalesWindow extends JPanel {
 			}
 		});
 		return_to_operator.setBounds(12, 10, 93, 23);
-		panel_1.add(return_to_operator);
+		contentPane.add(return_to_operator);
 		
 		date_label = createDateLabel();
-		panel_1.add(date_label);
+		contentPane.add(date_label);
 		
 		JButton previous_month = new JButton("<");
 		previous_month.addActionListener(new ActionListener() {
@@ -81,11 +83,11 @@ public class SalesWindow extends JPanel {
 			}
 		});
 		previous_month.setBounds(117, 10, 41, 23);
-		panel_1.add(previous_month);
+		contentPane.add(previous_month);
 		
 		JButton next_month = new JButton(">");
 		next_month.setBounds(225, 10, 41, 23);
-		panel_1.add(next_month);
+		contentPane.add(next_month);
 		next_month.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				handleNext();
@@ -94,13 +96,26 @@ public class SalesWindow extends JPanel {
 		
 		beverage_combo_box = createComboBox();
 		beverage_combo_box.setBounds(269, 10, 107, 23);
-		panel_1.add(beverage_combo_box);
+		contentPane.add(beverage_combo_box);
 		
 		JTable table = createTableWithDate(date_label.getText());
 		
 		scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(12, 43, 366, 427);
-		panel_1.add(scrollPane);
+		contentPane.add(scrollPane);
+	}
+	
+	private void updateComboBox() {
+		
+		contentPane.remove(beverage_combo_box);
+		
+		beverage_combo_box = createComboBox();
+		beverage_combo_box.setBounds(269, 10, 107, 23);
+		
+		contentPane.add(beverage_combo_box);
+		
+		revalidate();
+		repaint();
 	}
 	
 	private JLabel createDateLabel() {
@@ -292,7 +307,7 @@ public class SalesWindow extends JPanel {
 		return table;
 	}
 	
-	private void updateTable() {
+	public void updateTable() {
 
 		JTable table;
 		if (is_group_date) {
@@ -452,5 +467,18 @@ public class SalesWindow extends JPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void insertToSalesList(Beverage b) {
+		
+		String date = LocalDate.now().toString();
+		String type = b.getType();
+		String price = String.valueOf(b.getPrice());
+		String amount = String.valueOf(1);
+		
+		insertToGroupDate(date, type, price, amount);
+		insertToGroupBeverage(date, type, price, amount);
+		
+		updateComboBox();
 	}
 }
