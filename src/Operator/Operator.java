@@ -34,7 +34,7 @@ public class Operator extends JPanel {
 	
 	private Operator() {
 		
-		//setBounds(100, 100, 402, 490);
+		setBounds(100, 100, 402, 490);
 		
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -60,6 +60,14 @@ public class Operator extends JPanel {
 			}
 		});
 		panel_6.add(btnNewButton_2);
+		
+		JButton button_1 = new JButton("보충");
+		button_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				handleAddMoney();
+			}
+		});
+		panel_6.add(button_1);
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBounds(12, 87, 368, 74);
@@ -124,8 +132,8 @@ public class Operator extends JPanel {
 	
 	// 일별/월별 매출 버튼 클릭 시 이벤트
 	private void handleSales() {
-		SalesWindow window = SalesWindow.create();
-		Vender.vender.setContentPane(window);
+		SalesWindow.sales_window.updateTable();
+		Vender.vender.setContentPane(SalesWindow.sales_window);
 	}
 	
 	// 물건 커스터마이징 버튼 클릭 시 이벤트
@@ -164,6 +172,23 @@ public class Operator extends JPanel {
 				amount = Vender.DEFAULT_CHANGE_AMOUNT;
 		
 			m.setAmount(amount);
+		}
+		
+		updateMoneyPanel(money);
+	}
+	
+	// 보충 버튼 클릭 시 이벤트
+	private void handleAddMoney() {
+		
+		LinkedList<Money> money = Vender.vender.getMoney();
+		int amount = Vender.DEFAULT_CHANGE_AMOUNT;
+		
+		for (int i=0, size=money.size(); i<size; ++i) {
+			
+			Money m = money.get(i);
+			
+			if (m.getAmount() < amount)
+				m.setAmount(amount);
 		}
 		
 		updateMoneyPanel(money);
